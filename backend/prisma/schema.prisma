@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev2.db"
+}
+
+model Citizen {
+  id           String      @id @default(uuid())
+  email        String      @unique
+  passwordHash String
+  name         String?
+  complaints   Complaint[]
+  createdAt    DateTime    @default(now())
+}
+
+model PoliceOfficer {
+  id           String   @id @default(uuid())
+  policeId     String   @unique // Must be min 6 chars, alphabets and numbers
+  passwordHash String
+  stationName  String?
+  createdAt    DateTime @default(now())
+}
+
+model Complaint {
+  id               String   @id @default(uuid())
+  citizenId        String
+  citizen          Citizen  @relation(fields: [citizenId], references: [id])
+  originalText     String
+  originalLanguage String   // e.g., te, hi, en
+  translatedText   String?  // English translation for police
+  category         String?  // inferred category e.g., theft, harassment
+  priority         String   @default("NORMAL") // URGENT, HIGH, NORMAL
+  status           String   @default("PENDING") // PENDING, REVIEWING, RESOLVED
+  location         String?
+  evidenceUrls     String?  // JSON string of URLs
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+}
